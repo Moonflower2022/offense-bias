@@ -7,11 +7,16 @@ requires-python = ">=3.11"
 dependencies = [
     "aif360>=0.6.1",
     "anthropic>=0.53.0",
+    "chardet>=5.2.0",
     "fastparquet>=2024.11.0",
     "google-generativeai>=0.8.5",
+    "nltk>=3.9.1",
     "pandas>=2.3.0",
     "pyarrow>=20.0.0",
     "python-dotenv>=1.1.0",
+    "scikit-learn>=1.7.0",
+    "textstat>=0.7.7",
     "torch>=2.7.1",
     "transformers>=4.52.4",
+    "vadersentiment>=3.3.2",
 ]
