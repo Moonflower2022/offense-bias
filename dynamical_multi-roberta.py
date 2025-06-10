@@ -4,7 +4,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch.nn.functional as F
 
 # Load your new dataset
-df = pd.read_csv("dynamically_generated.csv")
+df = pd.read_csv("datasets/dynamical.csv")
 
 # Load model
 tokenizer = AutoTokenizer.from_pretrained("badmatr11x/distilroberta-base-offensive-hateful-speech-text-multiclassification")

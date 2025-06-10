@@ -365,7 +365,7 @@ def main():
     classifier = ClaudeHateClassifier()
     
     # Configuration
-    DATASET_PATH = "superset.csv"
+    DATASET_PATH = "datasets/superset.csv"
     SAMPLE_SIZE = 10
     RANDOM_SEED = 42
     OUTPUT_FILE = "claude_predictions_sample.csv"
