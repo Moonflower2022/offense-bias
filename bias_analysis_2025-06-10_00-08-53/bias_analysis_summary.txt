@@ -1,0 +1,153 @@
+================================================================================
+COMPREHENSIVE BIAS ANALYSIS REPORT
+================================================================================
+Analysis Date: 2025-06-10 00:10:23
+Model: badmatr11x/distilroberta-base-offensive-hateful-speech-text-multiclassification
+
+DATASET OVERVIEW:
+----------------------------------------
+TRAIN: 2000 samples
+  Label distribution: {0: np.int64(136), 1: np.int64(632), 2: np.int64(1232)}
+  Gender distribution: {0.0: np.int64(1957), 1.0: np.int64(43)}
+  Detected race categories: {'synthetic_majority': np.int64(52), 'synthetic_minority': np.int64(13), 'african_american': np.int64(1)}
+VALIDATION: 2000 samples
+  Label distribution: {0: np.int64(127), 1: np.int64(712), 2: np.int64(1161)}
+  Gender distribution: {0.0: np.int64(1131), 1.0: np.int64(869)}
+  Detected race categories: {'synthetic_majority': np.int64(1072), 'synthetic_minority': np.int64(289), 'african_american': np.int64(25), 'white': np.int64(12), 'asian': np.int64(6), 'hispanic': np.int64(3)}
+TEST: 2000 samples
+  Label distribution: {0: np.int64(140), 1: np.int64(665), 2: np.int64(1195)}
+  Gender distribution: {0.0: np.int64(1098), 1.0: np.int64(902)}
+  Detected race categories: {'synthetic_majority': np.int64(1070), 'synthetic_minority': np.int64(275), 'african_american': np.int64(28), 'white': np.int64(22), 'asian': np.int64(9), 'hispanic': np.int64(3)}
+
+BIAS ANALYSIS - TRAIN:
+--------------------------------------------------
+  GENDER:
+    Total samples: 2000
+    Group 0 samples: 1957
+    Group 1 samples: 43
+    base_rate_privileged: 0.2791
+    base_rate_unprivileged: 0.3863
+    statistical_parity_difference: 0.1072
+    disparate_impact: 1.3843
+    accuracy_privileged: 1.0000
+    accuracy_unprivileged: 0.9980
+    equalized_odds_difference: 0.0026
+    equal_opportunity_difference: -0.0026
+
+  RACE:
+    Total samples: 2000
+    Group 0 samples: 1986
+    Group 1 samples: 14
+    base_rate_privileged: 0.4286
+    base_rate_unprivileged: 0.3837
+    statistical_parity_difference: -0.0449
+    disparate_impact: 0.8953
+    accuracy_privileged: 1.0000
+    accuracy_unprivileged: 0.9980
+    equalized_odds_difference: 0.0026
+    equal_opportunity_difference: -0.0026
+
+  AGE:
+    Total samples: 2000
+    Group 0 samples: 1980
+    Group 1 samples: 20
+    base_rate_privileged: 0.4500
+    base_rate_unprivileged: 0.3833
+    statistical_parity_difference: -0.0667
+    disparate_impact: 0.8519
+    accuracy_privileged: 1.0000
+    accuracy_unprivileged: 0.9980
+    equalized_odds_difference: 0.0026
+    equal_opportunity_difference: -0.0026
+
+BIAS ANALYSIS - VALIDATION:
+--------------------------------------------------
+  GENDER:
+    Total samples: 2000
+    Group 0 samples: 1131
+    Group 1 samples: 869
+    base_rate_privileged: 0.4131
+    base_rate_unprivileged: 0.4244
+    statistical_parity_difference: 0.0113
+    disparate_impact: 1.0273
+    accuracy_privileged: 0.9712
+    accuracy_unprivileged: 0.9779
+    equalized_odds_difference: 0.0105
+    equal_opportunity_difference: 0.0105
+
+  RACE:
+    Total samples: 2000
+    Group 0 samples: 1686
+    Group 1 samples: 314
+    base_rate_privileged: 0.4522
+    base_rate_unprivileged: 0.4134
+    statistical_parity_difference: -0.0388
+    disparate_impact: 0.9141
+    accuracy_privileged: 0.9745
+    accuracy_unprivileged: 0.9751
+    equalized_odds_difference: 0.0009
+    equal_opportunity_difference: 0.0009
+
+  AGE:
+    Total samples: 2000
+    Group 0 samples: 1541
+    Group 1 samples: 459
+    base_rate_privileged: 0.4466
+    base_rate_unprivileged: 0.4114
+    statistical_parity_difference: -0.0352
+    disparate_impact: 0.9212
+    accuracy_privileged: 0.9782
+    accuracy_unprivileged: 0.9740
+    equalized_odds_difference: 0.0146
+    equal_opportunity_difference: 0.0089
+
+BIAS ANALYSIS - TEST:
+--------------------------------------------------
+  GENDER:
+    Total samples: 2000
+    Group 0 samples: 1098
+    Group 1 samples: 902
+    base_rate_privileged: 0.3803
+    base_rate_unprivileged: 0.4208
+    statistical_parity_difference: 0.0405
+    disparate_impact: 1.1065
+    accuracy_privileged: 0.9667
+    accuracy_unprivileged: 0.9709
+    equalized_odds_difference: 0.0317
+    equal_opportunity_difference: 0.0317
+
+  RACE:
+    Total samples: 2000
+    Group 0 samples: 1697
+    Group 1 samples: 303
+    base_rate_privileged: 0.3498
+    base_rate_unprivileged: 0.4119
+    statistical_parity_difference: 0.0621
+    disparate_impact: 1.1774
+    accuracy_privileged: 0.9538
+    accuracy_unprivileged: 0.9717
+    equalized_odds_difference: 0.0448
+    equal_opportunity_difference: 0.0448
+
+  AGE:
+    Total samples: 2000
+    Group 0 samples: 1554
+    Group 1 samples: 446
+    base_rate_privileged: 0.3677
+    base_rate_unprivileged: 0.4125
+    statistical_parity_difference: 0.0448
+    disparate_impact: 1.1218
+    accuracy_privileged: 0.9641
+    accuracy_unprivileged: 0.9704
+    equalized_odds_difference: 0.0265
+    equal_opportunity_difference: 0.0265
+
+INTERPRETATION GUIDE:
+----------------------------------------
+Statistical Parity Difference: Closer to 0 is better (range: -1 to 1)
+Disparate Impact: Closer to 1 is better (0.8-1.25 is often considered fair)
+Equalized Odds Difference: Closer to 0 is better (range: -1 to 1)
+Equal Opportunity Difference: Closer to 0 is better (range: -1 to 1)
+
+Note: This analysis uses simplified demographic detection from text content.
+Results should be interpreted carefully and validated with domain experts.
