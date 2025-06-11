@@ -104,16 +104,21 @@ class ModelBiasAnalyzer:
         
         return distribution_analysis
     
-    def calculate_base_rate_gaps(self) -> pd.DataFrame:
-        """Calculate base rate gaps between countries and overall dataset."""
-        overall_positive_rate = self.overall_metrics['recall']  # Using recall as overall positive rate
+    def calculate_accuracy_differences(self) -> pd.DataFrame:
+        """Calculate accuracy differences between overall model accuracy and country-specific accuracies."""
+        # Overall accuracy across all countries
+        overall_accuracy = self.overall_metrics['accuracy']
+
+        # Copy country-level metrics
+        df = self.country_metrics.copy()
+
+        # Compute the difference: overall accuracy minus country accuracy
+        df['accuracy_difference'] = df['accuracy'] - overall_accuracy
+        df['abs_accuracy_difference'] = df['accuracy_difference'].abs()
+
+        # Return the relevant columns sorted by magnitude of the difference
+        return df[['country', 'accuracy', 'accuracy_difference', 'abs_accuracy_difference']].sort_values('abs_accuracy_difference', ascending=False)
         
-        base_rate_analysis = self.country_metrics.copy()
-        base_rate_analysis['base_rate_gap'] = base_rate_analysis['ground_truth_positive_rate'] - overall_positive_rate
-        base_rate_analysis['abs_base_rate_gap'] = np.abs(base_rate_analysis['base_rate_gap'])
-        
-        return base_rate_analysis[['country', 'ground_truth_positive_rate', 'base_rate_gap', 'abs_base_rate_gap']].sort_values('abs_base_rate_gap', ascending=False)
-    
     def calculate_disparate_impact_ratio(self) -> pd.DataFrame:
         """Calculate disparate impact ratio for each country."""
         # Overall positive prediction rate
@@ -163,7 +168,7 @@ class ModelBiasAnalyzer:
         """Perform comprehensive bias analysis."""
         analysis = {
             'sample_distribution': self.analyze_sample_distribution(),
-            'base_rate_gaps': self.calculate_base_rate_gaps(),
+            'accuracy_differences': self.calculate_accuracy_differences(),
             'disparate_impact': self.calculate_disparate_impact_ratio(),
             'equal_opportunity': self.calculate_equal_opportunity_difference(),
             'ppv_bias': self.calculate_ppv_bias()
@@ -240,32 +245,34 @@ class ModelBiasAnalyzer:
                     ha='center', fontsize=7, alpha=0.8
                 )
         
-        # 1. Sample Distribution (Top 10)
-        sd = self.bias_analysis['sample_distribution']['country_sample_sizes'].head(10)
-        fig, ax = plt.subplots(figsize=(12, 6))
-        xs = np.arange(len(sd))
-        ax.bar(xs, sd['total_samples'])
+        # 1. Sample Distribution (All Countries)
+        sd = self.bias_analysis['sample_distribution']['country_sample_sizes']
+        n = len(sd)
+        # Make figure wider if many countries so labels stay readable
+        fig, ax = plt.subplots(figsize=(max(12, n * 0.3), 6))
+        xs = np.arange(n)
+        ax.bar(xs, sd['total_samples'], alpha=0.8, edgecolor='black')
         ax.set_xticks(xs)
-        ax.set_xticklabels(sd['country'], rotation=45, ha='right')
-        ax.set_title('Sample Distribution by Country (Top 10)', fontsize=16, fontweight='bold')
+        ax.set_xticklabels(sd['country'], rotation=45, ha='right', fontsize=8)
+        ax.set_title('Sample Distribution by Country', fontsize=16, fontweight='bold')
         ax.set_ylabel('Sample Count', fontsize=14)
         fig.tight_layout()
-        fig.savefig(f'{plot_dir}/sample_distribution.png', dpi=300)
+        fig.savefig(f'{plot_dir}/sample_distribution_all.png', dpi=300)
         plt.close(fig)
         
-        # 2. Base Rate Gaps (All Countries)
-        br = self.bias_analysis['base_rate_gaps']  # no .head(10), include everyone
+        # 2. Accuracy Differences (All Countries)
+        br = self.bias_analysis['accuracy_differences']  # no .head(10), include everyone
         n = len(br)
         # Make figure wider if many countries so labels stay readable
         fig, ax = plt.subplots(figsize=(max(12, n * 0.4), 6))
         xs = np.arange(n)
-        colors = ['red' if val > 0 else 'blue' for val in br['base_rate_gap']]
-        ax.bar(xs, br['base_rate_gap'], color=colors, alpha=0.7)
+        colors = ['red' if val > 0 else 'blue' for val in br['accuracy_difference']]
+        ax.bar(xs, br['accuracy_difference'], color=colors, alpha=0.7)
         ax.set_xticks(xs)
         ax.set_xticklabels(br['country'], rotation=45, ha='right', fontsize=8)
         ax.axhline(0, color='black', linestyle='-', alpha=0.3)
-        ax.set_title('Base Rate Gaps by Country', fontsize=16, fontweight='bold')
-        ax.set_ylabel('Base Rate Gap', fontsize=14)
+        ax.set_title('Accuracy Differences by Country', fontsize=16, fontweight='bold')
+        ax.set_ylabel('Accuracy Differences', fontsize=14)
         fig.tight_layout()
         fig.savefig(f'{plot_dir}/accuracy_differences.png', dpi=300)
         plt.close(fig)
@@ -445,9 +452,9 @@ class ModelBiasAnalyzer:
         print("-" * 40)
         
         print("\nTop 10 Countries by Base Rate Gap:")
-        base_rate_top = self.bias_analysis['base_rate_gaps'].head(10)
-        for _, row in base_rate_top.iterrows():
-            print(f"  {row['country']}: {row['base_rate_gap']:+.4f}")
+        accuracy_difference_top = self.bias_analysis['accuracy_differences'].head(10)
+        for _, row in accuracy_difference_top.iterrows():
+            print(f"  {row['country']}: {row['accuracy_difference']:+.4f}")
         
         print("\nCountries with Significant Disparate Impact:")
         di_issues = self.bias_analysis['disparate_impact'][
@@ -475,7 +482,9 @@ def main():
     
     # For demonstration, we'll use the data from the document
     # In practice, you would load your JSON file like this:
-    analyzer = ModelBiasAnalyzer(data_path='outputs/10_17:38/detailed_metrics.json')
+    directory = "outputs/0610_18:11"
+
+    analyzer = ModelBiasAnalyzer(data_path=f'{directory}/detailed_metrics.json')
 
     # Run comprehensive analysis
     analyzer.comprehensive_bias_analysis()
@@ -484,7 +493,7 @@ def main():
     analyzer.print_detailed_report()
     
     # Create individual plots (new method)
-    analyzer.create_individual_plots()
+    analyzer.create_individual_plots(plot_dir=f'{directory}/figures')
     
     # Optionally, still create the comprehensive plot (original method)
     # analyzer.create_visualizations(save_plots=True, plot_dir='outputs/figures/')

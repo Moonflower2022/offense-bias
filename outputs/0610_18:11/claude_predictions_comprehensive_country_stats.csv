@@ -1,0 +1,84 @@
+,sample_size,sample_proportion,ground_truth_positive_rate,ground_truth_positive_count,ground_truth_negative_count
+United Kingdom,269,0.1345,0.24535315985130113,66,203
+United States,1134,0.567,0.11816578483245149,134,1000
+Belgium,5,0.0025,0.2,1,4
+China,3,0.0015,0.0,0,3
+Australia,110,0.055,0.18181818181818182,20,90
+Canada,64,0.032,0.09375,6,58
+Syrian Arab Republic,2,0.001,0.0,0,2
+Kenya,10,0.005,0.3,3,7
+Germany,17,0.0085,0.058823529411764705,1,16
+Ireland,20,0.01,0.2,4,16
+Nigeria,33,0.0165,0.0,0,33
+New Zealand,10,0.005,0.3,3,7
+Japan,9,0.0045,0.0,0,9
+Zimbabwe,3,0.0015,0.0,0,3
+Belize,1,0.0005,0.0,0,1
+South Africa,19,0.0095,0.15789473684210525,3,16
+Mexico,4,0.002,0.25,1,3
+India,72,0.036,0.19444444444444445,14,58
+France,8,0.004,0.25,2,6
+Indonesia,4,0.002,0.25,1,3
+Ethiopia,4,0.002,0.0,0,4
+Malaysia,4,0.002,0.0,0,4
+Pakistan,10,0.005,0.3,3,7
+Hong Kong,32,0.016,0.3125,10,22
+Dominican Republic,1,0.0005,1.0,1,0
+Barbados,2,0.001,0.5,1,1
+Nepal,1,0.0005,0.0,0,1
+Spain,8,0.004,0.375,3,5
+Philippines,8,0.004,0.0,0,8
+Egypt,2,0.001,0.0,0,2
+Ghana,1,0.0005,0.0,0,1
+Iraq,6,0.003,0.16666666666666666,1,5
+Uganda,6,0.003,0.0,0,6
+Israel,6,0.003,0.0,0,6
+Luxembourg,2,0.001,0.0,0,2
+Lebanon,4,0.002,0.0,0,4
+Ukraine,2,0.001,0.0,0,2
+Netherlands,4,0.002,0.0,0,4
+Sierra Leone,1,0.0005,0.0,0,1
+Turkey,8,0.004,0.0,0,8
+Saudi Arabia,1,0.0005,0.0,0,1
+Yemen,1,0.0005,1.0,1,0
+Kuwait,1,0.0005,0.0,0,1
+Singapore,4,0.002,0.25,1,3
+Bangladesh,3,0.0015,0.0,0,3
+"Korea, Republic of",2,0.001,0.0,0,2
+Sweden,2,0.001,0.5,1,1
+Jamaica,2,0.001,0.5,1,1
+Portugal,2,0.001,0.5,1,1
+Brazil,1,0.0005,0.0,0,1
+Greece,7,0.0035,0.0,0,7
+Rwanda,1,0.0005,0.0,0,1
+Italy,3,0.0015,0.3333333333333333,1,2
+Myanmar,2,0.001,0.0,0,2
+Hungary,2,0.001,0.0,0,2
+Qatar,1,0.0005,1.0,1,0
+Poland,4,0.002,0.25,1,3
+United Arab Emirates,7,0.0035,0.2857142857142857,2,5
+Azerbaijan,6,0.003,0.16666666666666666,1,5
+Saint Lucia,1,0.0005,0.0,0,1
+Bahamas,1,0.0005,0.0,0,1
+Sri Lanka,1,0.0005,0.0,0,1
+Trinidad and Tobago,1,0.0005,0.0,0,1
+Russian Federation,3,0.0015,0.3333333333333333,1,2
+Guernsey,1,0.0005,0.0,0,1
+Finland,2,0.001,0.0,0,2
+Norway,3,0.0015,0.3333333333333333,1,2
+"Iran, Islamic Republic of",3,0.0015,0.0,0,3
+Puerto Rico,4,0.002,0.0,0,4
+Cambodia,1,0.0005,1.0,1,0
+Viet Nam,1,0.0005,0.0,0,1
+Namibia,1,0.0005,0.0,0,1
+Thailand,3,0.0015,0.3333333333333333,1,2
+Madagascar,1,0.0005,0.0,0,1
+Jordan,2,0.001,0.5,1,1
+Lesotho,1,0.0005,0.0,0,1
+Austria,2,0.001,0.5,1,1
+Somalia,1,0.0005,0.0,0,1
+Lithuania,1,0.0005,0.0,0,1
+Fiji,1,0.0005,0.0,0,1
+"Taiwan, Province of China",2,0.001,0.0,0,2
+Tunisia,1,0.0005,0.0,0,1
+Afghanistan,1,0.0005,0.0,0,1

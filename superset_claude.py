@@ -472,7 +472,7 @@ def main():
     
     # Configuration
     DATASET_PATH = "datasets/superset.csv"
-    SAMPLE_SIZE = 400  # Increased for better bias analysis
+    SAMPLE_SIZE = 2000  # Increased for better bias analysis
     RANDOM_SEED = 42
     OUTPUT_FILE = "claude_predictions_comprehensive.csv"
     
