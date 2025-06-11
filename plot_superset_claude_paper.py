@@ -16,11 +16,12 @@ warnings.filterwarnings("ignore")
 #  Key changes (vs. your original script)
 #  1.  Horizontal bars & trimmed views (top‑k / bottom‑k + "Other") so all labels are
 #      readable in print.
-#  2.  Automatic figure height (0.25 inch per row, capped) and 600 dpi output.
+#  2.  Automatic figure height (0.25 inch per row, capped) and 600 dpi output.
 #  3.  Log‑scaled sample‑count chart _and_ a Lorenz curve to show inequality succinctly.
 #  4.  Outlier‑only annotations removed – colour encodes significance instead.
 #  5.  A new `create_paper_plots()` method that drops all figures directly to a folder
 #      ready for LaTeX / Word import.  No interactive libraries required.
+#  6.  Modified middle-k selection to be closest to target value instead of mean.
 # ----------------------------------------------------------------------------------
 
 class ModelBiasAnalyzerPaper:
@@ -184,16 +185,22 @@ class ModelBiasAnalyzerPaper:
     #  Plot helpers ------------------------------------------------------------
     # -------------------------------------------------------------------------
     @staticmethod
-    def bucket_top_mid_other(df: pd.DataFrame, col: str, k) -> pd.DataFrame:
-        """Return *top‑k*, *middle‑k* (closest to mean), *bottom‑k* rows and a
+    def bucket_top_mid_other(df: pd.DataFrame, col: str, k: int, target_value: float = None) -> pd.DataFrame:
+        """Return *top‑k*, *middle‑k* (closest to target), *bottom‑k* rows and a
         single aggregated **Other** row.
 
         * Top‑k  : largest *k* values.
         * Bottom : smallest *k* values.
-        * Middle : rows whose value is closest to the *mean* of the column,
+        * Middle : rows whose value is closest to the *target_value*,
                 excluding those already in Top/Bottom.
         * Other  : one row with country='Other' and the **mean** value of the
                 remaining rows.
+        
+        Args:
+            df: DataFrame to process
+            col: Column name to bucket on
+            k: Number of entries for each bucket
+            target_value: Target value for middle selection. If None, uses mean.
         """
         n = len(df)
         if k * 3 >= n:
@@ -210,9 +217,14 @@ class ModelBiasAnalyzerPaper:
             middle = pd.DataFrame(columns=df.columns)
             other_rows = pd.DataFrame(columns=df.columns)
         else:
-            mean_val = remaining[col].mean()
-            # Middle‑k closest to the mean
-            middle = remaining.iloc[(remaining[col] - mean_val).abs().argsort()[:k]].copy()
+            # Use target_value if provided, otherwise fall back to mean
+            if target_value is not None:
+                reference_val = target_value
+            else:
+                reference_val = remaining[col].mean()
+            
+            # Middle‑k closest to the reference value
+            middle = remaining.iloc[(remaining[col] - reference_val).abs().argsort()[:k]].copy()
             rest = remaining.drop(middle.index)
             # Aggregated Other (mean of remaining rows)
             other_val = rest[col].mean() if not rest.empty else np.nan
@@ -237,7 +249,7 @@ class ModelBiasAnalyzerPaper:
         ax.axvline(0, color="k", linewidth=0.8)
         ax.set_xlabel(xlabel)
         ax.set_ylabel("")
-        ax.set_title(title, fontsize=14)
+        ax.set_title(title)
         fig.tight_layout()
         fig.savefig(path, dpi=600)
         plt.close(fig)
@@ -246,7 +258,7 @@ class ModelBiasAnalyzerPaper:
     #  Paper‑ready plotting pipeline ------------------------------------------
     # -------------------------------------------------------------------------
     def create_paper_plots(self, plot_dir: str = "outputs/paper_figs", k: int = 20):
-        """Generate publication‑quality static figures (600 dpi)."""
+        """Generate publication‑quality static figures (600 dpi)."""
         if not self.bias_analysis:
             self.comprehensive_bias_analysis()
 
@@ -254,7 +266,13 @@ class ModelBiasAnalyzerPaper:
         sns.set_palette("muted")
 
         # ---------- 1. Accuracy Δ (horizontal, trimmed) ----------------------
-        adf = self.bucket_top_mid_other(self.bias_analysis["accuracy_differences"], "accuracy_difference", k)
+        # Target value is 0 (no difference from overall accuracy)
+        adf = self.bucket_top_mid_other(
+            self.bias_analysis["accuracy_differences"], 
+            "accuracy_difference", 
+            k, 
+            target_value=0.0
+        )
         adf = adf.sort_values("accuracy_difference")
         palette = ["#d62728" if v < 0 else "#2ca02c" for v in adf["accuracy_difference"]]
         self._barh(
@@ -294,7 +312,13 @@ class ModelBiasAnalyzerPaper:
         plt.close(fig)
 
         # ---------- 3. Disparate impact (scatter, trimmed) -------------------
-        di = self.bucket_top_mid_other(self.bias_analysis["disparate_impact"], "disparate_impact_ratio", k)
+        # Target value is 1.0 (no disparate impact)
+        di = self.bucket_top_mid_other(
+            self.bias_analysis["disparate_impact"], 
+            "disparate_impact_ratio", 
+            k, 
+            target_value=1.0
+        )
         di = di.sort_values("disparate_impact_ratio")
         fig_h = min(10, max(4, 0.22 * len(di)))
         fig, ax = plt.subplots(figsize=(8, fig_h))
@@ -311,7 +335,13 @@ class ModelBiasAnalyzerPaper:
         plt.close(fig)
 
         # ---------- 4. Equal opportunity diff --------------------------------
-        eo = self.bucket_top_mid_other(self.bias_analysis["equal_opportunity"], "equal_opportunity_diff", k)
+        # Target value is 0.0 (no difference in equal opportunity)
+        eo = self.bucket_top_mid_other(
+            self.bias_analysis["equal_opportunity"], 
+            "equal_opportunity_diff", 
+            k, 
+            target_value=0.0
+        )
         eo = eo.sort_values("equal_opportunity_diff")
         fig, ax = plt.subplots(figsize=(8, fig_h))
         colors = ["#2ca02c" if f == "Acceptable" else "#d62728" for f in eo["eo_flag"]]
@@ -327,7 +357,13 @@ class ModelBiasAnalyzerPaper:
         plt.close(fig)
 
         # ---------- 5. PPV bias ----------------------------------------------
-        ppv = self.bucket_top_mid_other(self.bias_analysis["ppv_bias"], "ppv_bias", k)
+        # Target value is 0.0 (no PPV bias)
+        ppv = self.bucket_top_mid_other(
+            self.bias_analysis["ppv_bias"], 
+            "ppv_bias", 
+            k, 
+            target_value=0.0
+        )
         ppv = ppv.sort_values("ppv_bias")
         fig, ax = plt.subplots(figsize=(8, fig_h))
         colors = ["#2ca02c" if f == "Acceptable" else "#d62728" for f in ppv["ppv_flag"]]
@@ -372,7 +408,7 @@ class ModelBiasAnalyzerPaper:
             cbar_kws={"label": "Count"},
             ax=ax,
         )
-        ax.set_title("Overall Confusion Matrix", fontsize=12)
+        ax.set_title("Confusion Matrix", fontsize=12)
         fig.tight_layout()
         fig.savefig(f"{plot_dir}/confusion_matrix_paper.png", dpi=600)
         plt.close(fig)
