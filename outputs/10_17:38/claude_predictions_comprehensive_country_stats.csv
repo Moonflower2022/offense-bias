@@ -1,0 +1,41 @@
+,sample_size,sample_proportion,ground_truth_positive_rate,ground_truth_positive_count,ground_truth_negative_count
+United Kingdom,54,0.135,0.2222222222222222,12,42
+United States,223,0.5575,0.09417040358744394,21,202
+Belgium,4,0.01,0.25,1,3
+China,1,0.0025,0.0,0,1
+Australia,18,0.045,0.0,0,18
+Canada,11,0.0275,0.0,0,11
+Syrian Arab Republic,1,0.0025,0.0,0,1
+Kenya,2,0.005,0.5,1,1
+Germany,7,0.0175,0.0,0,7
+Ireland,4,0.01,0.25,1,3
+Nigeria,6,0.015,0.0,0,6
+New Zealand,1,0.0025,0.0,0,1
+Japan,2,0.005,0.0,0,2
+Zimbabwe,2,0.005,0.0,0,2
+Belize,1,0.0025,0.0,0,1
+South Africa,7,0.0175,0.2857142857142857,2,5
+Mexico,1,0.0025,0.0,0,1
+India,13,0.0325,0.07692307692307693,1,12
+France,3,0.0075,0.0,0,3
+Indonesia,1,0.0025,1.0,1,0
+Ethiopia,1,0.0025,0.0,0,1
+Malaysia,1,0.0025,0.0,0,1
+Pakistan,1,0.0025,0.0,0,1
+Hong Kong,9,0.0225,0.2222222222222222,2,7
+Dominican Republic,1,0.0025,1.0,1,0
+Barbados,1,0.0025,1.0,1,0
+Nepal,1,0.0025,0.0,0,1
+Spain,4,0.01,0.5,2,2
+Philippines,4,0.01,0.0,0,4
+Egypt,1,0.0025,0.0,0,1
+Ghana,1,0.0025,0.0,0,1
+Iraq,2,0.005,0.5,1,1
+Uganda,1,0.0025,0.0,0,1
+Israel,1,0.0025,0.0,0,1
+Luxembourg,2,0.005,0.0,0,2
+Lebanon,1,0.0025,0.0,0,1
+Ukraine,1,0.0025,0.0,0,1
+Netherlands,2,0.005,0.0,0,2
+Sierra Leone,1,0.0025,0.0,0,1
+Turkey,2,0.005,0.0,0,2

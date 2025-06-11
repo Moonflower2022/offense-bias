@@ -9,6 +9,7 @@ import dotenv
 import pickle
 import hashlib
 import numpy as np
+from datetime import datetime
 
 class ClaudeHateClassifier:
     def __init__(self, api_key: str = None, cache_dir: str = "cache"):
@@ -36,6 +37,17 @@ class ClaudeHateClassifier:
         # Load existing caches
         self.prediction_cache = self._load_prediction_cache()
         self.sample_cache = self._load_sample_cache()
+        
+        # Setup output directory for this run
+        self.output_dir = self._create_output_directory()
+        
+    def _create_output_directory(self) -> str:
+        """Create timestamped output directory"""
+        timestamp = datetime.now().strftime("%m%d_%H:%M")
+        output_dir = os.path.join("outputs", timestamp)
+        os.makedirs(output_dir, exist_ok=True)
+        print(f"Output directory created: {output_dir}")
+        return output_dir
         
     def _load_prediction_cache(self) -> Dict:
         """Load prediction cache from disk"""
@@ -233,59 +245,45 @@ Respond with only a single number: 1 for hateful, 0 for not hateful. Do not incl
         
         return sampled_df
     
-    def classify_batch(self, texts: List[str], batch_delay: float = 1.0) -> List[int]:
-        """
-        Classify a batch of texts with rate limiting and caching
-        
-        Args:
-            texts: List of texts to classify
-            batch_delay: Delay between API calls in seconds
-            
-        Returns:
-            List of predictions (1, 0, or -1 for errors)
-        """
-        predictions = []
-        cache_hits = 0
-        
-        for i, text in enumerate(tqdm(texts, desc="Classifying texts")):
-            text_hash = self._get_text_hash(text)
-            
-            if text_hash in self.prediction_cache:
-                prediction = self.prediction_cache[text_hash]
-                cache_hits += 1
-            else:
-                prediction = self.classify_single_text(text)
-                # Rate limiting only for actual API calls
-                if i < len(texts) - 1:
-                    time.sleep(batch_delay)
-            
-            predictions.append(prediction)
-        
-        print(f"Cache hits: {cache_hits}/{len(texts)} ({cache_hits/len(texts)*100:.1f}%)")
-        return predictions
-    
     def process_dataset(self, df: pd.DataFrame, output_file: str = None, 
                        save_interval: int = 50) -> pd.DataFrame:
         """
-        Process the dataset and save results with caching
+        Process the dataset and save comprehensive results with caching
         
         Args:
             df: DataFrame with 'text' column
-            output_file: Path to save results (optional)
+            output_file: Path to save results (optional, will be placed in output_dir)
             save_interval: Save progress every N predictions
             
         Returns:
-            DataFrame with predictions added
+            DataFrame with predictions and metadata added
         """
         # Create a copy of the dataframe
         result_df = df.copy()
         
+        # Add new columns for comprehensive analysis
+        result_df['claude_predictions'] = -1
+        result_df['prediction_timestamp'] = pd.Timestamp.now()
+        result_df['text_length'] = result_df['text'].str.len()
+        result_df['text_hash'] = result_df['text'].apply(self._get_text_hash)
+        
+        # Set output file path within timestamped directory
+        if output_file is None:
+            output_file = "claude_predictions_comprehensive.csv"
+        output_path = os.path.join(self.output_dir, output_file)
+        
+        # Calculate country-level statistics for bias analysis
+        print("\nCalculating country-level statistics...")
+        country_stats = self._calculate_country_statistics(result_df)
+        
+        # Save country statistics to separate file
+        country_stats_file = os.path.join(self.output_dir, output_file.replace('.csv', '_country_stats.csv'))
+        country_stats_df = pd.DataFrame.from_dict(country_stats, orient='index')
+        country_stats_df.to_csv(country_stats_file)
+        print(f"Country statistics saved to {country_stats_file}")
+        
         # Get texts to classify
         texts = result_df['text'].tolist()
-        
-        # Initialize predictions column
-        result_df['claude_predictions'] = -1
-        result_df['claude_confidence'] = None  # Placeholder for future confidence scores
         
         print(f"Starting classification of {len(texts)} texts...")
         
@@ -308,29 +306,133 @@ Respond with only a single number: 1 for hateful, 0 for not hateful. Do not incl
             result_df.iloc[i, result_df.columns.get_loc('claude_predictions')] = prediction
             
             # Save progress periodically
-            if output_file and (i + 1) % save_interval == 0:
-                result_df.to_csv(output_file, index=False)
+            if (i + 1) % save_interval == 0:
+                result_df.to_csv(output_path, index=False)
                 print(f"Progress saved: {i + 1}/{len(texts)} completed (Cache: {cache_hits}, API: {api_calls})")
         
         print(f"Final stats - Cache hits: {cache_hits}/{len(texts)} ({cache_hits/len(texts)*100:.1f}%)")
         print(f"API calls made: {api_calls}")
         
-        # Final save
-        if output_file:
-            result_df.to_csv(output_file, index=False)
-            print(f"Results saved to {output_file}")
+        # Add final metadata
+        result_df['processing_completed'] = pd.Timestamp.now()
+        result_df['cache_hit'] = result_df['text_hash'].apply(lambda x: x in self.prediction_cache)
+        
+        # Final save with comprehensive data
+        result_df.to_csv(output_path, index=False)
+        print(f"Complete results saved to {output_path}")
+        
+        # Save summary statistics
+        summary_file = os.path.join(self.output_dir, output_file.replace('.csv', '_summary.json'))
+        summary_stats = self._generate_summary_statistics(result_df)
+        with open(summary_file, 'w') as f:
+            json.dump(summary_stats, f, indent=2, default=str)
+        print(f"Summary statistics saved to {summary_file}")
         
         return result_df
     
+    def _calculate_country_statistics(self, df: pd.DataFrame) -> Dict:
+        """Calculate country-level statistics for bias analysis"""
+        country_stats = {}
+        
+        for country in df['post_author_country_location'].unique():
+            country_data = df[df['post_author_country_location'] == country]
+            
+            stats = {
+                'sample_size': len(country_data),
+                'sample_proportion': len(country_data) / len(df),
+            }
+            
+            # If ground truth labels are available
+            if 'labels' in df.columns:
+                stats.update({
+                    'ground_truth_positive_rate': country_data['labels'].mean(),
+                    'ground_truth_positive_count': int(country_data['labels'].sum()),
+                    'ground_truth_negative_count': int(len(country_data) - country_data['labels'].sum()),
+                })
+            
+            country_stats[country] = stats
+        
+        return country_stats
+    
+    def _calculate_country_prediction_rates(self, df: pd.DataFrame) -> Dict:
+        """Calculate country-specific prediction rates"""
+        country_predictions = {}
+        
+        # Filter out error predictions
+        valid_df = df[df['claude_predictions'] != -1]
+        
+        for country in df['post_author_country_location'].unique():
+            country_data = valid_df[valid_df['post_author_country_location'] == country]
+            
+            if len(country_data) > 0:
+                prediction_stats = {
+                    'total_valid_predictions': len(country_data),
+                    'predicted_positive_count': int((country_data['claude_predictions'] == 1).sum()),
+                    'predicted_negative_count': int((country_data['claude_predictions'] == 0).sum()),
+                    'predicted_positive_rate': (country_data['claude_predictions'] == 1).mean(),
+                    'predicted_negative_rate': (country_data['claude_predictions'] == 0).mean(),
+                }
+                
+                # Add ground truth comparison if available
+                if 'labels' in country_data.columns:
+                    prediction_stats.update({
+                        'ground_truth_positive_rate': country_data['labels'].mean(),
+                        'accuracy': (country_data['labels'] == country_data['claude_predictions']).mean(),
+                        'true_positive_count': int(((country_data['labels'] == 1) & (country_data['claude_predictions'] == 1)).sum()),
+                        'true_negative_count': int(((country_data['labels'] == 0) & (country_data['claude_predictions'] == 0)).sum()),
+                        'false_positive_count': int(((country_data['labels'] == 0) & (country_data['claude_predictions'] == 1)).sum()),
+                        'false_negative_count': int(((country_data['labels'] == 1) & (country_data['claude_predictions'] == 0)).sum()),
+                    })
+                
+                country_predictions[country] = prediction_stats
+            else:
+                country_predictions[country] = {
+                    'total_valid_predictions': 0,
+                    'predicted_positive_count': 0,
+                    'predicted_negative_count': 0,
+                    'predicted_positive_rate': 0.0,
+                    'predicted_negative_rate': 0.0,
+                }
+        
+        return country_predictions
+    
+    def _generate_summary_statistics(self, df: pd.DataFrame) -> Dict:
+        """Generate comprehensive summary statistics"""
+        summary = {
+            'total_samples': len(df),
+            'processing_timestamp': pd.Timestamp.now(),
+            'countries_analyzed': df['post_author_country_location'].nunique(),
+            'country_distribution': df['post_author_country_location'].value_counts().to_dict(),
+            'prediction_distribution': df['claude_predictions'].value_counts().to_dict(),
+            'error_count': int((df['claude_predictions'] == -1).sum()),
+            'cache_hit_rate': df['cache_hit'].mean() if 'cache_hit' in df.columns else None,
+        }
+        
+        # Add country-specific prediction rates
+        country_prediction_rates = self._calculate_country_prediction_rates(df)
+        summary['country_prediction_rates'] = country_prediction_rates
+        
+        # Add ground truth comparison if available
+        if 'labels' in df.columns:
+            valid_predictions = df[df['claude_predictions'] != -1]
+            if len(valid_predictions) > 0:
+                summary.update({
+                    'ground_truth_distribution': df['labels'].value_counts().to_dict(),
+                    'valid_predictions': len(valid_predictions),
+                    'overall_accuracy': (valid_predictions['labels'] == valid_predictions['claude_predictions']).mean(),
+                })
+        
+        return summary
+    
     def evaluate_predictions(self, df: pd.DataFrame) -> Dict:
         """
-        Evaluate Claude predictions against ground truth labels
+        Evaluate Claude predictions against ground truth labels with country-specific metrics
         
         Args:
             df: DataFrame with 'labels' and 'claude_predictions' columns
             
         Returns:
-            Dictionary with evaluation metrics
+            Dictionary with evaluation metrics including country-specific rates
         """
         # Filter out error predictions (-1)
         valid_mask = df['claude_predictions'] != -1
@@ -342,7 +444,7 @@ Respond with only a single number: 1 for hateful, 0 for not hateful. Do not incl
         y_true = valid_df['labels']
         y_pred = valid_df['claude_predictions']
         
-        # Calculate metrics
+        # Calculate overall metrics
         from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
         
         metrics = {
@@ -356,6 +458,10 @@ Respond with only a single number: 1 for hateful, 0 for not hateful. Do not incl
             'confusion_matrix': confusion_matrix(y_true, y_pred).tolist()
         }
         
+        # Add country-specific prediction rates
+        country_prediction_rates = self._calculate_country_prediction_rates(df)
+        metrics['country_prediction_rates'] = country_prediction_rates
+        
         return metrics
 
 def main():
@@ -366,9 +472,9 @@ def main():
     
     # Configuration
     DATASET_PATH = "datasets/superset.csv"
-    SAMPLE_SIZE = 10
+    SAMPLE_SIZE = 400  # Increased for better bias analysis
     RANDOM_SEED = 42
-    OUTPUT_FILE = "claude_predictions_sample.csv"
+    OUTPUT_FILE = "claude_predictions_comprehensive.csv"
     
     # Load and sample dataset
     print("Loading and sampling dataset...")
@@ -382,7 +488,7 @@ def main():
     print(f"\nSample of selected data:")
     print(df[['text', 'labels', 'post_author_country_location']].head())
     
-    # Process dataset
+    # Process dataset with comprehensive output
     print(f"\nStarting classification of {len(df)} samples...")
     
     result_df = classifier.process_dataset(
@@ -390,14 +496,14 @@ def main():
         output_file=OUTPUT_FILE
     )
     
-    # Evaluate results if ground truth labels are available
+    # Comprehensive evaluation if ground truth labels are available
     if 'labels' in result_df.columns:
         print("\nEvaluating predictions...")
         metrics = classifier.evaluate_predictions(result_df)
         
-        print("\nEvaluation Results:")
+        print("\nOverall Evaluation Results:")
         for key, value in metrics.items():
-            if key != 'confusion_matrix':
+            if key not in ['confusion_matrix', 'country_prediction_rates']:
                 print(f"{key}: {value}")
         
         if 'confusion_matrix' in metrics:
@@ -405,9 +511,32 @@ def main():
             cm = metrics['confusion_matrix']
             print(f"TN: {cm[0][0]}, FP: {cm[0][1]}")
             print(f"FN: {cm[1][0]}, TP: {cm[1][1]}")
+        
+        # Display country-specific prediction rates
+        if 'country_prediction_rates' in metrics:
+            print(f"\nCountry-Specific Prediction Rates:")
+            for country, stats in metrics['country_prediction_rates'].items():
+                if stats['total_valid_predictions'] > 0:
+                    print(f"\n{country}:")
+                    print(f"  Total predictions: {stats['total_valid_predictions']}")
+                    print(f"  Predicted positive rate: {stats['predicted_positive_rate']:.3f}")
+                    if 'accuracy' in stats:
+                        print(f"  Accuracy: {stats['accuracy']:.3f}")
+                        print(f"  Ground truth positive rate: {stats['ground_truth_positive_rate']:.3f}")
+        
+        # Save detailed metrics to file
+        metrics_file = os.path.join(classifier.output_dir, "detailed_metrics.json")
+        with open(metrics_file, 'w') as f:
+            json.dump(metrics, f, indent=2, default=str)
+        print(f"\nDetailed metrics saved to: {metrics_file}")
     
-    print(f"\nProcessing complete! Results saved to {OUTPUT_FILE}")
-    print(f"Cache files saved in 'cache/' directory for future runs")
+    print(f"\nProcessing complete! All files saved to: {classifier.output_dir}")
+    print(f"Files created:")
+    print(f"  - {OUTPUT_FILE}")
+    print(f"  - {OUTPUT_FILE.replace('.csv', '_country_stats.csv')}")
+    print(f"  - {OUTPUT_FILE.replace('.csv', '_summary.json')}")
+    print(f"  - detailed_metrics.json")
+    print(f"\nCache files maintained in 'cache/' directory for future runs")
 
 if __name__ == "__main__":
     dotenv.load_dotenv(".env")
