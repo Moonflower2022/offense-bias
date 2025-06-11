@@ -384,13 +384,14 @@ class ModelBiasAnalyzer:
             summary['bias_flags']['equal_opportunity_issues'],
             summary['bias_flags']['ppv_bias_issues']
         ]
+        total_countries = summary['data_representation']['total_countries']
         types = ['Disparate Impact', 'Equal Opportunity', 'PPV Bias']
         fig, ax = plt.subplots(figsize=(12, 6))
         bars = ax.bar(types, counts, alpha=0.7, edgecolor='black', color=['red','orange','yellow'])
         for bar, c in zip(bars, counts):
             ax.text(bar.get_x()+bar.get_width()/2, c+0.1, str(c),
                     ha='center', va='bottom', fontsize=12, fontweight='bold')
-        ax.set_title('Number of Countries with Significant Bias Issues', fontsize=16, fontweight='bold')
+        ax.set_title(f'Number of Countries (out of {total_countries}) with Significant Bias Issues', fontsize=16, fontweight='bold')
         ax.set_ylabel('Number of Countries', fontsize=14)
         fig.tight_layout()
         fig.savefig(f'{plot_dir}/bias_summary.png', dpi=300)
@@ -482,7 +483,7 @@ def main():
     
     # For demonstration, we'll use the data from the document
     # In practice, you would load your JSON file like this:
-    directory = "outputs/0610_18:11"
+    directory = "outputs/0610_20:54"
 
     analyzer = ModelBiasAnalyzer(data_path=f'{directory}/detailed_metrics.json')
 

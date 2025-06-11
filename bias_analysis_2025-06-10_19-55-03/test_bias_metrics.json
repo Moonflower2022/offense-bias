@@ -1,0 +1,59 @@
+{
+  "gender": {
+    "sample_counts": {
+      "total_samples": 2000,
+      "group_0_samples": 1098,
+      "group_1_samples": 902
+    },
+    "dataset_metrics": {
+      "base_rate_privileged": 0.3858093126385809,
+      "base_rate_unprivileged": 0.41621129326047357,
+      "statistical_parity_difference": 0.030401980621892644,
+      "disparate_impact": 1.0788005359797332
+    },
+    "classification_metrics": {
+      "accuracy_privileged": 0.9733924611973392,
+      "accuracy_unprivileged": 0.9653916211293261,
+      "equalized_odds_difference": 0.012080627629437308,
+      "equal_opportunity_difference": 2.515153801663228e-05
+    }
+  },
+  "race": {
+    "sample_counts": {
+      "total_samples": 2000,
+      "group_0_samples": 1674,
+      "group_1_samples": 326
+    },
+    "dataset_metrics": {
+      "base_rate_privileged": 0.3834355828220859,
+      "base_rate_unprivileged": 0.4062126642771804,
+      "statistical_parity_difference": 0.022777081455094494,
+      "disparate_impact": 1.0594026284348865
+    },
+    "classification_metrics": {
+      "accuracy_privileged": 0.9815950920245399,
+      "accuracy_unprivileged": 0.966547192353644,
+      "equalized_odds_difference": 0.016529411764705904,
+      "equal_opportunity_difference": -0.016529411764705904
+    }
+  },
+  "age": {
+    "sample_counts": {
+      "total_samples": 2000,
+      "group_0_samples": 1517,
+      "group_1_samples": 483
+    },
+    "dataset_metrics": {
+      "base_rate_privileged": 0.4078674948240166,
+      "base_rate_unprivileged": 0.4007910349373764,
+      "statistical_parity_difference": -0.007076459886640185,
+      "disparate_impact": 0.98265010088707
+    },
+    "classification_metrics": {
+      "accuracy_privileged": 0.989648033126294,
+      "accuracy_unprivileged": 0.962425840474621,
+      "equalized_odds_difference": 0.04069262623563985,
+      "equal_opportunity_difference": -0.04069262623563985
+    }
+  }
+}
