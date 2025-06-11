@@ -441,16 +441,15 @@ if __name__ == "__main__":
         description="Generate publication‑quality bias & performance figures."
     )
     parser.add_argument(
-        "--json", required=True, help="Path to detailed_metrics.json (or similar)"
-    )
-    parser.add_argument(
-        "--out", default="outputs/paper_figs", help="Output directory for figures"
+        "--experiment", required=True, help="Path to experiment directory with detailed_metrics.json (e.g. 0610_20:54)"
     )
     parser.add_argument(
         "-k", type=int, default=20, help="Top & bottom k countries to show"
     )
     args = parser.parse_args()
 
-    analyzer = ModelBiasAnalyzerPaper(data_path=args.json)
+
+
+    analyzer = ModelBiasAnalyzerPaper(data_path=f"outputs/{args.experiment}/detailed_metrics.json")
     analyzer.comprehensive_bias_analysis()
-    analyzer.create_paper_plots(plot_dir=args.out, k=args.k)
+    analyzer.create_paper_plots(plot_dir=f"outputs/{args.experiment}/paper_figs", k=args.k)
