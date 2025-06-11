@@ -253,7 +253,7 @@ class ModelBiasAnalyzer:
         xs = np.arange(n)
         ax.bar(xs, sd['total_samples'], alpha=0.8, edgecolor='black')
         ax.set_xticks(xs)
-        ax.set_xticklabels(sd['country'], rotation=45, ha='right', fontsize=8)
+        ax.set_xticklabels(sd['country'], rotation=90, ha='right', fontsize=8)
         ax.set_title('Sample Distribution by Country', fontsize=16, fontweight='bold')
         ax.set_ylabel('Sample Count', fontsize=14)
         fig.tight_layout()
@@ -269,7 +269,7 @@ class ModelBiasAnalyzer:
         colors = ['red' if val > 0 else 'blue' for val in br['accuracy_difference']]
         ax.bar(xs, br['accuracy_difference'], color=colors, alpha=0.7)
         ax.set_xticks(xs)
-        ax.set_xticklabels(br['country'], rotation=45, ha='right', fontsize=8)
+        ax.set_xticklabels(br['country'], rotation=90, ha='right', fontsize=8)
         ax.axhline(0, color='black', linestyle='-', alpha=0.3)
         ax.set_title('Accuracy Differences by Country', fontsize=16, fontweight='bold')
         ax.set_ylabel('Accuracy Differences', fontsize=14)
@@ -285,7 +285,7 @@ class ModelBiasAnalyzer:
         colors = ['red' if f=='Significant' else 'green' for f in di['disparate_impact_flag']]
         ax.scatter(xs, ys, c=colors, alpha=0.7, s=60)
         ax.set_xticks(xs)
-        ax.set_xticklabels(di['country'], rotation=45, ha='right')
+        ax.set_xticklabels(di['country'], rotation=90, ha='right')
         annotate_all(ax, xs, ys, di['country'])
         ax.axhline(0.8, linestyle='--', alpha=0.5, label='Lower Threshold (0.8)')
         ax.axhline(1.25, linestyle='--', alpha=0.5, label='Upper Threshold (1.25)')
@@ -305,7 +305,7 @@ class ModelBiasAnalyzer:
         colors = ['red' if f=='Significant' else 'green' for f in eo['eo_flag']]
         ax.scatter(xs, ys, c=colors, alpha=0.7, s=60)
         ax.set_xticks(xs)
-        ax.set_xticklabels(eo['country'], rotation=45, ha='right')
+        ax.set_xticklabels(eo['country'], rotation=90, ha='right')
         annotate_all(ax, xs, ys, eo['country'])
         ax.axhline(0, linestyle='-', alpha=0.3, label='Parity Line')
         ax.axhline(0.1, linestyle='--', alpha=0.5, label='Upper Threshold (0.1)')
@@ -325,7 +325,7 @@ class ModelBiasAnalyzer:
         colors = ['red' if f=='Significant' else 'green' for f in ppv['ppv_flag']]
         ax.scatter(xs, ys, c=colors, alpha=0.7, s=60)
         ax.set_xticks(xs)
-        ax.set_xticklabels(ppv['country'], rotation=45, ha='right')
+        ax.set_xticklabels(ppv['country'], rotation=90)
         annotate_all(ax, xs, ys, ppv['country'])
         ax.axhline(0, linestyle='-', alpha=0.3, label='Parity Line')
         ax.axhline(0.1, linestyle='--', alpha=0.5, label='Upper Threshold (0.1)')
