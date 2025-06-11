@@ -239,20 +239,7 @@ class ModelBiasAnalyzerPaper:
         bottom["bucket"] = "Bottom"
         other_rows["bucket"] = "Other"
 
-        return pd.concat([top, middle, bottom, other_rows], ignore_index=True)
-
-    @staticmethod
-    def _barh(df: pd.DataFrame, x: str, y: str, path: str, title: str, xlabel: str, palette):
-        fig_h = min(10, max(4, 0.25 * len(df)))
-        fig, ax = plt.subplots(figsize=(8, fig_h))
-        sns.barplot(data=df, x=x, y=y, palette=palette, ax=ax)
-        ax.axvline(0, color="k", linewidth=0.8)
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel("")
-        ax.set_title(title)
-        fig.tight_layout()
-        fig.savefig(path, dpi=600)
-        plt.close(fig)
+        return pd.concat([top, middle, bottom, other_rows], ignore_index=True)        
 
     # -------------------------------------------------------------------------
     #  Paper‑ready plotting pipeline ------------------------------------------
@@ -275,15 +262,24 @@ class ModelBiasAnalyzerPaper:
         )
         adf = adf.sort_values("accuracy_difference")
         palette = ["#d62728" if v < 0 else "#2ca02c" for v in adf["accuracy_difference"]]
-        self._barh(
-            adf,
-            "accuracy_difference",
-            "country",
-            f"{plot_dir}/accuracy_diff_paper.png",
-            f"Accuracy Δ vs Overall (Top, Middle, & Bottom {k} + Other)",
-            "Δ Accuracy",
-            palette,
-        )
+
+        fig_h = min(10, max(4, 0.25 * len(adf)))
+        fig, ax = plt.subplots(figsize=(8, fig_h))
+        sns.barplot(data=adf, x="accuracy_difference", y="country", palette=palette, ax=ax)
+        ax.axvline(0, color="k", linewidth=0.8)
+        
+        # Add dotted lines at 15th position from top and bottom
+        n_entries = len(adf)
+        if n_entries > 30:  # Only add lines if we have more than 30 entries
+            ax.axhline(k - 0.5, color="gray", linestyle=":", linewidth=1, alpha=0.7)  # 15th from top
+            ax.axhline(n_entries - k - 0.5, color="gray", linestyle=":", linewidth=1, alpha=0.7)  # 15th from bottom
+        
+        ax.set_xlabel("Δ Accuracy")
+        ax.set_ylabel("")
+        ax.set_title(f"Accuracy Δ vs Overall (Top, Middle, & Bottom {k} + Other)")
+        fig.tight_layout()
+        fig.savefig(f"{plot_dir}/accuracy_diff_paper.png", dpi=600)
+        plt.close(fig)
 
         # ---------- 2. Sample distribution (log & Lorenz) -------------------
         sd = self.bias_analysis["sample_distribution"]["country_sample_sizes"]
@@ -327,6 +323,13 @@ class ModelBiasAnalyzerPaper:
         ax.axvline(1.0, color="k", linewidth=0.8)
         ax.axvline(0.8, color="k", linestyle="--", linewidth=0.8)
         ax.axvline(1.25, color="k", linestyle="--", linewidth=0.8)
+        
+        # Add dotted lines at 15th position from top and bottom
+        n_entries = len(di)
+        if n_entries > 30:  # Only add lines if we have more than 30 entries
+            ax.axhline(k - 0.5, color="gray", linestyle=":", linewidth=1, alpha=0.7)  # 15th from top
+            ax.axhline(n_entries - k - 0.5, color="gray", linestyle=":", linewidth=1, alpha=0.7)  # 15th from bottom
+        
         ax.set_xlabel("Disparate Impact Ratio")
         ax.set_ylabel("")
         ax.set_title(f"Disparate Impact (Top, Middle, & Bottom {k} + Other)")
@@ -349,6 +352,12 @@ class ModelBiasAnalyzerPaper:
         ax.axvline(0, color="k", linewidth=0.8)
         ax.axvline(0.1, color="k", linestyle="--", linewidth=0.8)
         ax.axvline(-0.1, color="k", linestyle="--", linewidth=0.8)
+        
+        n_entries = len(di)
+        if n_entries > 30:  # Only add lines if we have more than 30 entries
+            ax.axhline(k - 0.5, color="gray", linestyle=":", linewidth=1, alpha=0.7)  # 15th from top
+            ax.axhline(n_entries - k - 0.5, color="gray", linestyle=":", linewidth=1, alpha=0.7)  # 15th from bottom
+        
         ax.set_xlabel("Equal Opportunity Diff")
         ax.set_ylabel("")
         ax.set_title(f"Equal Opportunity Diff (Top, Middle, & Bottom {k} + Other)")
@@ -371,6 +380,12 @@ class ModelBiasAnalyzerPaper:
         ax.axvline(0, color="k", linewidth=0.8)
         ax.axvline(0.1, color="k", linestyle="--", linewidth=0.8)
         ax.axvline(-0.1, color="k", linestyle="--", linewidth=0.8)
+
+        n_entries = len(di)
+        if n_entries > 30:  # Only add lines if we have more than 30 entries
+            ax.axhline(k - 0.5, color="gray", linestyle=":", linewidth=1, alpha=0.7)  # 15th from top
+            ax.axhline(n_entries - k - 0.5, color="gray", linestyle=":", linewidth=1, alpha=0.7)  # 15th from bottom
+
         ax.set_xlabel("PPV Bias")
         ax.set_ylabel("")
         ax.set_title(f"PPV Bias (Top, Middle, & Bottom {k} + Other)")
