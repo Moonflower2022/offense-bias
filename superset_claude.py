@@ -10,6 +10,7 @@ import pickle
 import hashlib
 import numpy as np
 from datetime import datetime
+import argparse
 
 class ClaudeHateClassifier:
     def __init__(self, api_key: str = None, cache_dir: str = "cache"):
@@ -46,7 +47,7 @@ class ClaudeHateClassifier:
         timestamp = datetime.now().strftime("%m%d_%H:%M")
         output_dir = os.path.join("outputs", timestamp)
         os.makedirs(output_dir, exist_ok=True)
-        print(f"Output directory created: {output_dir}")
+        print(f"Output directory: {output_dir}")
         return output_dir
         
     def _load_prediction_cache(self) -> Dict:
@@ -89,29 +90,14 @@ class ClaudeHateClassifier:
         """Generate a hash for caching purposes"""
         return hashlib.md5(text.encode('utf-8')).hexdigest()
     
-    def _get_sample_key(self, dataset_path: str, seed: int, sample_size: int) -> str:
+    def _get_sample_key(self, dataset_path: str, seed: int, sample_size: int, equal_sampling: bool, allowed_countries: List[str]) -> str:
         """Generate a key for sample caching"""
-        return f"{dataset_path}_{seed}_{sample_size}"
+        countries_str = "_".join(sorted(allowed_countries))
+        return f"{dataset_path}_{seed}_{sample_size}_equal_{equal_sampling}_countries_{countries_str}"
         
     def create_classification_prompt(self, text: str) -> str:
         """Create a prompt for hate speech classification"""
-        prompt = f"""You are a hate speech detection system. Your task is to classify the following text as either hateful (1) or not hateful (0).
-
-Hateful content includes:
-- Content that attacks, threatens, or incites violence against individuals or groups based on protected characteristics (race, ethnicity, religion, gender, sexual orientation, disability, etc.)
-- Content that promotes hatred or discrimination
-- Content that dehumanizes individuals or groups
-- Slurs and offensive language targeting protected groups
-
-Non-hateful content includes:
-- General complaints or criticism
-- Profanity not directed at protected groups
-- Political opinions (unless promoting hatred)
-- Heated but non-discriminatory arguments
-
-Text to classify: "{text}"
-
-Respond with only a single number: 1 for hateful, 0 for not hateful. Do not include any explanation or additional text."""
+        prompt = f"""You are a hate speech detection system. Your task is to classify the following text as either hateful (1) or not hateful (0). Text to classify: "{text}" Respond with only a single number: 1 for hateful, 0 for not hateful. Do not include any explanation or additional text."""
         
         return prompt
     
@@ -175,73 +161,113 @@ Respond with only a single number: 1 for hateful, 0 for not hateful. Do not incl
         return -1
     
     def load_and_sample_dataset(self, dataset_path: str, sample_size: int = 400, 
-                               random_seed: int = 42) -> pd.DataFrame:
+                               random_seed: int = 42, equal_sampling: bool = False,
+                               allowed_countries: List[str] = None) -> pd.DataFrame:
         """
-        Load dataset, filter for entries with country locations, and sample randomly
+        Load dataset, filter for entries with country locations, and sample
         
         Args:
             dataset_path: Path to the CSV file
             sample_size: Number of samples to select
             random_seed: Random seed for reproducibility
+            equal_sampling: If True, sample equally from each country
+            allowed_countries: List of allowed countries (case-insensitive)
             
         Returns:
             Sampled DataFrame
         """
-        sample_key = self._get_sample_key(dataset_path, random_seed, sample_size)
+        # Default allowed countries (excluding unknown/NaN)
+        if allowed_countries is None:
+            allowed_countries = ['india', 'united kingdom', 'united states', 'nigeria']
+        
+        # Normalize country names to lowercase
+        allowed_countries = [c.lower() for c in allowed_countries]
+        
+        sample_key = self._get_sample_key(dataset_path, random_seed, sample_size, equal_sampling, allowed_countries)
         
         # Check if we have this sample cached
         if sample_key in self.sample_cache:
-            print(f"Loading cached sample selection...")
+            print(f"Loading cached sample...")
             indices = self.sample_cache[sample_key]
             df = pd.read_csv(dataset_path)
             sampled_df = df.iloc[indices].copy()
-            print(f"Loaded cached sample of {len(sampled_df)} rows")
+            print(f"Loaded {len(sampled_df)} cached samples")
             return sampled_df
         
-        print(f"Loading full dataset from {dataset_path}...")
+        print(f"Loading dataset from {dataset_path}...")
         df = pd.read_csv(dataset_path)
-        print(f"Loaded {len(df)} total rows")
-        print(f"Columns: {df.columns.tolist()}")
+        print(f"Dataset loaded: {len(df)} rows")
         
-        # Filter for entries with country locations (excluding "unknown")
-        print("\nFiltering for entries with known country locations...")
-        print(f"Unique country values: {df['post_author_country_location'].value_counts().head(10)}")
-        
-        # Filter out null, empty, and "unknown" values
+        # Filter for allowed countries (excluding unknown/NaN by default)
         country_mask = (
             df['post_author_country_location'].notna() & 
             (df['post_author_country_location'] != '') & 
-            (df['post_author_country_location'].str.lower() != 'unknown')
+            (df['post_author_country_location'].str.lower() != 'unknown') &
+            (df['post_author_country_location'].str.lower().isin(allowed_countries))
         )
+
         df_with_country = df[country_mask]
-        print(f"Found {len(df_with_country)} entries with known country locations")
+        print(f"After filtering: {len(df_with_country)} entries")
         
-        if len(df_with_country) < sample_size:
-            print(f"Warning: Only {len(df_with_country)} entries with country locations available, using all of them")
-            sampled_df = df_with_country.copy()
+        # Set random seed for reproducibility
+        np.random.seed(random_seed)
+        
+        if equal_sampling:
+            # Equal sampling from each country
+            samples_per_country = sample_size // len(allowed_countries)
+            remaining_samples = sample_size % len(allowed_countries)
+            
+            sampled_dfs = []
+            
+            for i, country in enumerate(allowed_countries):
+                country_data = df_with_country[
+                    df_with_country['post_author_country_location'].str.lower() == country
+                ]
+                
+                # Calculate samples for this country
+                country_sample_size = samples_per_country
+                if i < remaining_samples:  # Distribute remaining samples to first few countries
+                    country_sample_size += 1
+                
+                if len(country_data) < country_sample_size:
+                    country_sample_size = len(country_data)
+                
+                if country_sample_size > 0:
+                    country_sample = country_data.sample(n=country_sample_size, random_state=random_seed)
+                    sampled_dfs.append(country_sample)
+            
+            # Combine all country samples
+            if sampled_dfs:
+                sampled_df = pd.concat(sampled_dfs, ignore_index=True)
+                # Shuffle the combined samples
+                sampled_df = sampled_df.sample(frac=1, random_state=random_seed).reset_index(drop=True)
+            else:
+                sampled_df = pd.DataFrame()
+            
         else:
-            # Random sampling with seed
-            print(f"Randomly sampling {sample_size} entries (seed={random_seed})...")
-            np.random.seed(random_seed)
-            sampled_indices = np.random.choice(df_with_country.index, size=sample_size, replace=False)
-            sampled_df = df.loc[sampled_indices].copy()
+            # Random sampling (original behavior)
+            if len(df_with_country) < sample_size:
+                print(f"Warning: Only {len(df_with_country)} entries available, using all")
+                sampled_df = df_with_country.copy()
+            else:
+                sampled_indices = np.random.choice(df_with_country.index, size=sample_size, replace=False)
+                sampled_df = df.loc[sampled_indices].copy()
         
         # Cache the sample selection (store indices relative to full dataset)
-        self.sample_cache[sample_key] = sampled_df.index.tolist()
-        self._save_sample_cache()
+        if len(sampled_df) > 0:
+            self.sample_cache[sample_key] = sampled_df.index.tolist()
+            self._save_sample_cache()
         
         print(f"Selected {len(sampled_df)} samples")
         
-        # Show country distribution
+        # Show brief country and label distribution
         if len(sampled_df) > 0:
-            print(f"\nCountry distribution in sample:")
             country_counts = sampled_df['post_author_country_location'].value_counts()
-            print(country_counts.head(10))
+            print(f"Country distribution: {dict(country_counts)}")
             
-            # Show label distribution if available
             if 'labels' in sampled_df.columns:
-                print(f"\nLabel distribution in sample:")
-                print(sampled_df['labels'].value_counts())
+                label_counts = sampled_df['labels'].value_counts()
+                print(f"Label distribution: {dict(label_counts)}")
         
         return sampled_df
     
@@ -273,14 +299,12 @@ Respond with only a single number: 1 for hateful, 0 for not hateful. Do not incl
         output_path = os.path.join(self.output_dir, output_file)
         
         # Calculate country-level statistics for bias analysis
-        print("\nCalculating country-level statistics...")
         country_stats = self._calculate_country_statistics(result_df)
         
         # Save country statistics to separate file
         country_stats_file = os.path.join(self.output_dir, output_file.replace('.csv', '_country_stats.csv'))
         country_stats_df = pd.DataFrame.from_dict(country_stats, orient='index')
         country_stats_df.to_csv(country_stats_file)
-        print(f"Country statistics saved to {country_stats_file}")
         
         # Get texts to classify
         texts = result_df['text'].tolist()
@@ -301,17 +325,16 @@ Respond with only a single number: 1 for hateful, 0 for not hateful. Do not incl
                 prediction = self.classify_single_text(str(text))
                 api_calls += 1
                 # Rate limiting only for actual API calls
-                time.sleep(1.0)
+                time.sleep(0.1)
             
             result_df.iloc[i, result_df.columns.get_loc('claude_predictions')] = prediction
             
             # Save progress periodically
             if (i + 1) % save_interval == 0:
                 result_df.to_csv(output_path, index=False)
-                print(f"Progress saved: {i + 1}/{len(texts)} completed (Cache: {cache_hits}, API: {api_calls})")
         
-        print(f"Final stats - Cache hits: {cache_hits}/{len(texts)} ({cache_hits/len(texts)*100:.1f}%)")
-        print(f"API calls made: {api_calls}")
+        print(f"Cache hits: {cache_hits}/{len(texts)} ({cache_hits/len(texts)*100:.1f}%)")
+        print(f"API calls: {api_calls}")
         
         # Add final metadata
         result_df['processing_completed'] = pd.Timestamp.now()
@@ -319,14 +342,13 @@ Respond with only a single number: 1 for hateful, 0 for not hateful. Do not incl
         
         # Final save with comprehensive data
         result_df.to_csv(output_path, index=False)
-        print(f"Complete results saved to {output_path}")
+        print(f"Results saved to {output_path}")
         
         # Save summary statistics
         summary_file = os.path.join(self.output_dir, output_file.replace('.csv', '_summary.json'))
         summary_stats = self._generate_summary_statistics(result_df)
         with open(summary_file, 'w') as f:
             json.dump(summary_stats, f, indent=2, default=str)
-        print(f"Summary statistics saved to {summary_file}")
         
         return result_df
     
@@ -464,36 +486,68 @@ Respond with only a single number: 1 for hateful, 0 for not hateful. Do not incl
         
         return metrics
 
+def parse_arguments():
+    """Parse command line arguments"""
+    parser = argparse.ArgumentParser(description='Claude Hate Speech Classifier with Country Sampling Options')
+    
+    parser.add_argument('--dataset', type=str, default='datasets/superset.csv',
+                        help='Path to the dataset CSV file (default: datasets/superset.csv)')
+    
+    parser.add_argument('--sample-size', type=int, default=200,
+                        help='Total number of samples to select (default: 200)')
+    
+    parser.add_argument('--seed', type=int, default=42,
+                        help='Random seed for reproducibility (default: 42)')
+    
+    parser.add_argument('--equal-sampling', action='store_true',
+                        help='Use equal sampling from each country (default: random sampling)')
+    
+    parser.add_argument('--output-file', type=str, default='claude_predictions_comprehensive.csv',
+                        help='Output file name (default: claude_predictions_comprehensive.csv)')
+    
+    parser.add_argument('--allowed-countries', type=str, nargs='+', 
+                        default=['india', 'united kingdom', 'united states', 'nigeria'],
+                        help='List of allowed countries (default: india "united kingdom" "united states" nigeria)')
+    
+    return parser.parse_args()
+
 def main():
     """Main execution function"""
+    
+    # Parse command line arguments
+    args = parse_arguments()
     
     # Initialize classifier with caching
     classifier = ClaudeHateClassifier()
     
-    # Configuration
-    DATASET_PATH = "datasets/superset.csv"
-    SAMPLE_SIZE = 20000  # Increased for better bias analysis
-    RANDOM_SEED = 42
-    OUTPUT_FILE = "claude_predictions_comprehensive.csv"
+    # Print configuration
+    print("Configuration:")
+    print(f"  Dataset: {args.dataset}")
+    print(f"  Sample size: {args.sample_size}")
+    print(f"  Random seed: {args.seed}")
+    print(f"  Equal sampling: {args.equal_sampling}")
+    print(f"  Allowed countries: {args.allowed_countries}")
+    print(f"  Output file: {args.output_file}")
     
     # Load and sample dataset
-    print("Loading and sampling dataset...")
     df = classifier.load_and_sample_dataset(
-        dataset_path=DATASET_PATH,
-        sample_size=SAMPLE_SIZE,
-        random_seed=RANDOM_SEED
+        dataset_path=args.dataset,
+        sample_size=args.sample_size,
+        random_seed=args.seed,
+        equal_sampling=args.equal_sampling,
+        allowed_countries=args.allowed_countries
     )
     
-    # Show sample data
-    print(f"\nSample of selected data:")
-    print(df[['text', 'labels', 'post_author_country_location']].head())
+    if len(df) == 0:
+        print("No samples selected. Exiting.")
+        return
     
     # Process dataset with comprehensive output
     print(f"\nStarting classification of {len(df)} samples...")
     
     result_df = classifier.process_dataset(
         df, 
-        output_file=OUTPUT_FILE
+        output_file=args.output_file
     )
     
     # Comprehensive evaluation if ground truth labels are available
@@ -501,42 +555,26 @@ def main():
         print("\nEvaluating predictions...")
         metrics = classifier.evaluate_predictions(result_df)
         
-        print("\nOverall Evaluation Results:")
-        for key, value in metrics.items():
-            if key not in ['confusion_matrix', 'country_prediction_rates']:
-                print(f"{key}: {value}")
+        print("Evaluation Results:")
+        print(f"  Accuracy: {metrics.get('accuracy', 'N/A'):.3f}")
+        print(f"  Precision: {metrics.get('precision', 'N/A'):.3f}")
+        print(f"  Recall: {metrics.get('recall', 'N/A'):.3f}")
+        print(f"  F1 Score: {metrics.get('f1_score', 'N/A'):.3f}")
         
-        if 'confusion_matrix' in metrics:
-            print(f"\nConfusion Matrix:")
-            cm = metrics['confusion_matrix']
-            print(f"TN: {cm[0][0]}, FP: {cm[0][1]}")
-            print(f"FN: {cm[1][0]}, TP: {cm[1][1]}")
-        
-        # Display country-specific prediction rates
+        # Display country-specific prediction rates (brief)
         if 'country_prediction_rates' in metrics:
-            print(f"\nCountry-Specific Prediction Rates:")
+            print("\nCountry Prediction Rates:")
             for country, stats in metrics['country_prediction_rates'].items():
                 if stats['total_valid_predictions'] > 0:
-                    print(f"\n{country}:")
-                    print(f"  Total predictions: {stats['total_valid_predictions']}")
-                    print(f"  Predicted positive rate: {stats['predicted_positive_rate']:.3f}")
-                    if 'accuracy' in stats:
-                        print(f"  Accuracy: {stats['accuracy']:.3f}")
-                        print(f"  Ground truth positive rate: {stats['ground_truth_positive_rate']:.3f}")
+                    print(f"  {country}: {stats['predicted_positive_rate']:.3f} positive rate "
+                          f"({stats['total_valid_predictions']} samples)")
         
         # Save detailed metrics to file
         metrics_file = os.path.join(classifier.output_dir, "detailed_metrics.json")
         with open(metrics_file, 'w') as f:
             json.dump(metrics, f, indent=2, default=str)
-        print(f"\nDetailed metrics saved to: {metrics_file}")
     
-    print(f"\nProcessing complete! All files saved to: {classifier.output_dir}")
-    print(f"Files created:")
-    print(f"  - {OUTPUT_FILE}")
-    print(f"  - {OUTPUT_FILE.replace('.csv', '_country_stats.csv')}")
-    print(f"  - {OUTPUT_FILE.replace('.csv', '_summary.json')}")
-    print(f"  - detailed_metrics.json")
-    print(f"\nCache files maintained in 'cache/' directory for future runs")
+    print(f"\nProcessing complete! Files saved to: {classifier.output_dir}")
 
 if __name__ == "__main__":
     dotenv.load_dotenv(".env")

@@ -1,0 +1,5 @@
+,sample_size,sample_proportion,ground_truth_positive_rate,ground_truth_positive_count,ground_truth_negative_count
+United States,973,0.973,0.09763617677286741,95,878
+Pakistan,9,0.009,0.0,0,9
+Iraq,9,0.009,0.2222222222222222,2,7
+France,9,0.009,0.2222222222222222,2,7

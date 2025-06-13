@@ -1,0 +1,73 @@
+{
+  "total_samples": 12,
+  "valid_predictions": 12,
+  "error_predictions": 0,
+  "accuracy": 1.0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1_score": 1.0,
+  "confusion_matrix": [
+    [
+      10,
+      0
+    ],
+    [
+      0,
+      2
+    ]
+  ],
+  "country_prediction_rates": {
+    "Nigeria": {
+      "total_valid_predictions": 3,
+      "predicted_positive_count": 0,
+      "predicted_negative_count": 3,
+      "predicted_positive_rate": 0.0,
+      "predicted_negative_rate": 1.0,
+      "ground_truth_positive_rate": 0.0,
+      "accuracy": 1.0,
+      "true_positive_count": 0,
+      "true_negative_count": 3,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    },
+    "India": {
+      "total_valid_predictions": 3,
+      "predicted_positive_count": 2,
+      "predicted_negative_count": 1,
+      "predicted_positive_rate": 0.6666666666666666,
+      "predicted_negative_rate": 0.3333333333333333,
+      "ground_truth_positive_rate": 0.6666666666666666,
+      "accuracy": 1.0,
+      "true_positive_count": 2,
+      "true_negative_count": 1,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    },
+    "United States": {
+      "total_valid_predictions": 3,
+      "predicted_positive_count": 0,
+      "predicted_negative_count": 3,
+      "predicted_positive_rate": 0.0,
+      "predicted_negative_rate": 1.0,
+      "ground_truth_positive_rate": 0.0,
+      "accuracy": 1.0,
+      "true_positive_count": 0,
+      "true_negative_count": 3,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    },
+    "United Kingdom": {
+      "total_valid_predictions": 3,
+      "predicted_positive_count": 0,
+      "predicted_negative_count": 3,
+      "predicted_positive_rate": 0.0,
+      "predicted_negative_rate": 1.0,
+      "ground_truth_positive_rate": 0.0,
+      "accuracy": 1.0,
+      "true_positive_count": 0,
+      "true_negative_count": 3,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    }
+  }
+}

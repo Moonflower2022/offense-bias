@@ -1,0 +1,5 @@
+,sample_size,sample_proportion,ground_truth_positive_rate,ground_truth_positive_count,ground_truth_negative_count
+United States,154,0.77,0.12987012987012986,20,134
+United Kingdom,32,0.16,0.21875,7,25
+India,12,0.06,0.25,3,9
+Nigeria,2,0.01,0.0,0,2

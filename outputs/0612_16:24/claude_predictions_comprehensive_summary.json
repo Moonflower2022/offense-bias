@@ -1,0 +1,77 @@
+{
+  "total_samples": 200,
+  "processing_timestamp": "2025-06-12 16:24:45.466765",
+  "countries_analyzed": 4,
+  "country_distribution": {
+    "United States": 194,
+    "Pakistan": 3,
+    "Iraq": 2,
+    "France": 1
+  },
+  "prediction_distribution": {
+    "0": 176,
+    "1": 24
+  },
+  "error_count": 0,
+  "cache_hit_rate": 1.0,
+  "country_prediction_rates": {
+    "United States": {
+      "total_valid_predictions": 194,
+      "predicted_positive_count": 23,
+      "predicted_negative_count": 171,
+      "predicted_positive_rate": 0.11855670103092783,
+      "predicted_negative_rate": 0.8814432989690721,
+      "ground_truth_positive_rate": 0.0979381443298969,
+      "accuracy": 0.8969072164948454,
+      "true_positive_count": 11,
+      "true_negative_count": 163,
+      "false_positive_count": 12,
+      "false_negative_count": 8
+    },
+    "Pakistan": {
+      "total_valid_predictions": 3,
+      "predicted_positive_count": 0,
+      "predicted_negative_count": 3,
+      "predicted_positive_rate": 0.0,
+      "predicted_negative_rate": 1.0,
+      "ground_truth_positive_rate": 0.0,
+      "accuracy": 1.0,
+      "true_positive_count": 0,
+      "true_negative_count": 3,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    },
+    "Iraq": {
+      "total_valid_predictions": 2,
+      "predicted_positive_count": 1,
+      "predicted_negative_count": 1,
+      "predicted_positive_rate": 0.5,
+      "predicted_negative_rate": 0.5,
+      "ground_truth_positive_rate": 0.0,
+      "accuracy": 0.5,
+      "true_positive_count": 0,
+      "true_negative_count": 1,
+      "false_positive_count": 1,
+      "false_negative_count": 0
+    },
+    "France": {
+      "total_valid_predictions": 1,
+      "predicted_positive_count": 0,
+      "predicted_negative_count": 1,
+      "predicted_positive_rate": 0.0,
+      "predicted_negative_rate": 1.0,
+      "ground_truth_positive_rate": 0.0,
+      "accuracy": 1.0,
+      "true_positive_count": 0,
+      "true_negative_count": 1,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    }
+  },
+  "ground_truth_distribution": {
+    "0.0": 181,
+    "1.0": 19
+  },
+  "valid_predictions": 200,
+  "overall_accuracy": 0.895
+}
