@@ -483,7 +483,7 @@ def main():
     
     # For demonstration, we'll use the data from the document
     # In practice, you would load your JSON file like this:
-    directory = "outputs/0612_16:29"
+    directory = "outputs/0613_10:32"
 
     analyzer = ModelBiasAnalyzer(data_path=f'{directory}/detailed_metrics.json')
 

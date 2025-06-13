@@ -1,0 +1,5 @@
+,sample_size,sample_proportion,ground_truth_positive_rate,ground_truth_positive_count,ground_truth_negative_count
+Canada,1575,0.25,0.1657142857142857,261,1314
+United States,1575,0.25,0.1219047619047619,192,1383
+Australia,1575,0.25,0.23936507936507936,377,1198
+United Kingdom,1575,0.25,0.2806349206349206,442,1133

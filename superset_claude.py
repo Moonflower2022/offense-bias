@@ -92,7 +92,7 @@ class ClaudeHateClassifier:
     
     def _get_sample_key(self, dataset_path: str, seed: int, sample_size: int, equal_sampling: bool, allowed_countries: List[str]) -> str:
         """Generate a key for sample caching"""
-        countries_str = "_".join(sorted(allowed_countries))
+        countries_str = "_".join(sorted(allowed_countries)) if allowed_countries else "all_countries"
         return f"{dataset_path}_{seed}_{sample_size}_equal_{equal_sampling}_countries_{countries_str}"
         
     def create_classification_prompt(self, text: str) -> str:
@@ -171,19 +171,13 @@ class ClaudeHateClassifier:
             sample_size: Number of samples to select
             random_seed: Random seed for reproducibility
             equal_sampling: If True, sample equally from each country
-            allowed_countries: List of allowed countries (case-insensitive)
+            allowed_countries: List of allowed countries (case-insensitive). If None, all countries are allowed.
             
         Returns:
             Sampled DataFrame
         """
-        # Default allowed countries (excluding unknown/NaN)
-        if allowed_countries is None:
-            allowed_countries = ['india', 'united kingdom', 'united states', 'nigeria']
         
-        # Normalize country names to lowercase
-        allowed_countries = [c.lower() for c in allowed_countries]
-        
-        sample_key = self._get_sample_key(dataset_path, random_seed, sample_size, equal_sampling, allowed_countries)
+        sample_key = self._get_sample_key(dataset_path, random_seed, sample_size, equal_sampling, allowed_countries or [])
         
         # Check if we have this sample cached
         if sample_key in self.sample_cache:
@@ -198,28 +192,41 @@ class ClaudeHateClassifier:
         df = pd.read_csv(dataset_path)
         print(f"Dataset loaded: {len(df)} rows")
         
-        # Filter for allowed countries (excluding unknown/NaN by default)
+        # Filter for entries with valid country locations (excluding unknown/NaN)
         country_mask = (
             df['post_author_country_location'].notna() & 
             (df['post_author_country_location'] != '') & 
-            (df['post_author_country_location'].str.lower() != 'unknown') &
-            (df['post_author_country_location'].str.lower().isin(allowed_countries))
+            (df['post_author_country_location'].str.lower() != 'unknown')
         )
+        
+        # If specific countries are allowed, filter for those
+        if allowed_countries is not None:
+            # Normalize country names to lowercase
+            allowed_countries = [c.lower() for c in allowed_countries]
+            country_mask = country_mask & (df['post_author_country_location'].str.lower().isin(allowed_countries))
 
         df_with_country = df[country_mask]
         print(f"After filtering: {len(df_with_country)} entries")
+        
+        if allowed_countries:
+            print(f"Filtering for countries: {allowed_countries}")
+        else:
+            print("Using all available countries")
         
         # Set random seed for reproducibility
         np.random.seed(random_seed)
         
         if equal_sampling:
+            # Get unique countries from filtered data
+            unique_countries = df_with_country['post_author_country_location'].str.lower().unique()
+            
             # Equal sampling from each country
-            samples_per_country = sample_size // len(allowed_countries)
-            remaining_samples = sample_size % len(allowed_countries)
+            samples_per_country = sample_size // len(unique_countries)
+            remaining_samples = sample_size % len(unique_countries)
             
             sampled_dfs = []
             
-            for i, country in enumerate(allowed_countries):
+            for i, country in enumerate(unique_countries):
                 country_data = df_with_country[
                     df_with_country['post_author_country_location'].str.lower() == country
                 ]
@@ -505,9 +512,9 @@ def parse_arguments():
     parser.add_argument('--output-file', type=str, default='claude_predictions_comprehensive.csv',
                         help='Output file name (default: claude_predictions_comprehensive.csv)')
     
-    parser.add_argument('--allowed-countries', type=str, nargs='+', 
-                        default=['india', 'united kingdom', 'united states', 'nigeria'],
-                        help='List of allowed countries (default: india "united kingdom" "united states" nigeria)')
+    parser.add_argument('--allowed-countries', type=str, nargs='*', 
+                        default=None,
+                        help='List of allowed countries (default: all countries allowed). Use quotes for multi-word countries.')
     
     return parser.parse_args()
 
@@ -526,7 +533,12 @@ def main():
     print(f"  Sample size: {args.sample_size}")
     print(f"  Random seed: {args.seed}")
     print(f"  Equal sampling: {args.equal_sampling}")
-    print(f"  Allowed countries: {args.allowed_countries}")
+    
+    if args.allowed_countries:
+        print(f"  Allowed countries: {args.allowed_countries}")
+    else:
+        print("  Allowed countries: ALL (no filtering)")
+        
     print(f"  Output file: {args.output_file}")
     
     # Load and sample dataset

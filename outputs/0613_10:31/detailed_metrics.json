@@ -1,0 +1,177 @@
+{
+  "total_samples": 12,
+  "valid_predictions": 12,
+  "error_predictions": 0,
+  "accuracy": 1.0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1_score": 1.0,
+  "confusion_matrix": [
+    [
+      10,
+      0
+    ],
+    [
+      0,
+      2
+    ]
+  ],
+  "country_prediction_rates": {
+    "Sweden": {
+      "total_valid_predictions": 1,
+      "predicted_positive_count": 0,
+      "predicted_negative_count": 1,
+      "predicted_positive_rate": 0.0,
+      "predicted_negative_rate": 1.0,
+      "ground_truth_positive_rate": 0.0,
+      "accuracy": 1.0,
+      "true_positive_count": 0,
+      "true_negative_count": 1,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    },
+    "Italy": {
+      "total_valid_predictions": 1,
+      "predicted_positive_count": 0,
+      "predicted_negative_count": 1,
+      "predicted_positive_rate": 0.0,
+      "predicted_negative_rate": 1.0,
+      "ground_truth_positive_rate": 0.0,
+      "accuracy": 1.0,
+      "true_positive_count": 0,
+      "true_negative_count": 1,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    },
+    "United States": {
+      "total_valid_predictions": 1,
+      "predicted_positive_count": 0,
+      "predicted_negative_count": 1,
+      "predicted_positive_rate": 0.0,
+      "predicted_negative_rate": 1.0,
+      "ground_truth_positive_rate": 0.0,
+      "accuracy": 1.0,
+      "true_positive_count": 0,
+      "true_negative_count": 1,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    },
+    "Iraq": {
+      "total_valid_predictions": 1,
+      "predicted_positive_count": 0,
+      "predicted_negative_count": 1,
+      "predicted_positive_rate": 0.0,
+      "predicted_negative_rate": 1.0,
+      "ground_truth_positive_rate": 0.0,
+      "accuracy": 1.0,
+      "true_positive_count": 0,
+      "true_negative_count": 1,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    },
+    "Germany": {
+      "total_valid_predictions": 1,
+      "predicted_positive_count": 1,
+      "predicted_negative_count": 0,
+      "predicted_positive_rate": 1.0,
+      "predicted_negative_rate": 0.0,
+      "ground_truth_positive_rate": 1.0,
+      "accuracy": 1.0,
+      "true_positive_count": 1,
+      "true_negative_count": 0,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    },
+    "Australia": {
+      "total_valid_predictions": 1,
+      "predicted_positive_count": 0,
+      "predicted_negative_count": 1,
+      "predicted_positive_rate": 0.0,
+      "predicted_negative_rate": 1.0,
+      "ground_truth_positive_rate": 0.0,
+      "accuracy": 1.0,
+      "true_positive_count": 0,
+      "true_negative_count": 1,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    },
+    "Canada": {
+      "total_valid_predictions": 1,
+      "predicted_positive_count": 0,
+      "predicted_negative_count": 1,
+      "predicted_positive_rate": 0.0,
+      "predicted_negative_rate": 1.0,
+      "ground_truth_positive_rate": 0.0,
+      "accuracy": 1.0,
+      "true_positive_count": 0,
+      "true_negative_count": 1,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    },
+    "Panama": {
+      "total_valid_predictions": 1,
+      "predicted_positive_count": 1,
+      "predicted_negative_count": 0,
+      "predicted_positive_rate": 1.0,
+      "predicted_negative_rate": 0.0,
+      "ground_truth_positive_rate": 1.0,
+      "accuracy": 1.0,
+      "true_positive_count": 1,
+      "true_negative_count": 0,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    },
+    "New Zealand": {
+      "total_valid_predictions": 1,
+      "predicted_positive_count": 0,
+      "predicted_negative_count": 1,
+      "predicted_positive_rate": 0.0,
+      "predicted_negative_rate": 1.0,
+      "ground_truth_positive_rate": 0.0,
+      "accuracy": 1.0,
+      "true_positive_count": 0,
+      "true_negative_count": 1,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    },
+    "India": {
+      "total_valid_predictions": 1,
+      "predicted_positive_count": 0,
+      "predicted_negative_count": 1,
+      "predicted_positive_rate": 0.0,
+      "predicted_negative_rate": 1.0,
+      "ground_truth_positive_rate": 0.0,
+      "accuracy": 1.0,
+      "true_positive_count": 0,
+      "true_negative_count": 1,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    },
+    "United Kingdom": {
+      "total_valid_predictions": 1,
+      "predicted_positive_count": 0,
+      "predicted_negative_count": 1,
+      "predicted_positive_rate": 0.0,
+      "predicted_negative_rate": 1.0,
+      "ground_truth_positive_rate": 0.0,
+      "accuracy": 1.0,
+      "true_positive_count": 0,
+      "true_negative_count": 1,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    },
+    "Spain": {
+      "total_valid_predictions": 1,
+      "predicted_positive_count": 0,
+      "predicted_negative_count": 1,
+      "predicted_positive_rate": 0.0,
+      "predicted_negative_rate": 1.0,
+      "ground_truth_positive_rate": 0.0,
+      "accuracy": 1.0,
+      "true_positive_count": 0,
+      "true_negative_count": 1,
+      "false_positive_count": 0,
+      "false_negative_count": 0
+    }
+  }
+}

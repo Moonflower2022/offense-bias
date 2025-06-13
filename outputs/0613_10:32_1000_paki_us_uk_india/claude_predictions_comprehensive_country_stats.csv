@@ -1,0 +1,5 @@
+,sample_size,sample_proportion,ground_truth_positive_rate,ground_truth_positive_count,ground_truth_negative_count
+India,250,0.25,0.132,33,217
+United Kingdom,250,0.25,0.32,80,170
+Pakistan,250,0.25,0.124,31,219
+United States,250,0.25,0.164,41,209

@@ -1,0 +1,77 @@
+{
+  "total_samples": 1000,
+  "processing_timestamp": "2025-06-13 11:02:35.883463",
+  "countries_analyzed": 4,
+  "country_distribution": {
+    "India": 250,
+    "United Kingdom": 250,
+    "Pakistan": 250,
+    "United States": 250
+  },
+  "prediction_distribution": {
+    "0": 750,
+    "1": 250
+  },
+  "error_count": 0,
+  "cache_hit_rate": 1.0,
+  "country_prediction_rates": {
+    "India": {
+      "total_valid_predictions": 250,
+      "predicted_positive_count": 78,
+      "predicted_negative_count": 172,
+      "predicted_positive_rate": 0.312,
+      "predicted_negative_rate": 0.688,
+      "ground_truth_positive_rate": 0.132,
+      "accuracy": 0.804,
+      "true_positive_count": 31,
+      "true_negative_count": 170,
+      "false_positive_count": 47,
+      "false_negative_count": 2
+    },
+    "United Kingdom": {
+      "total_valid_predictions": 250,
+      "predicted_positive_count": 73,
+      "predicted_negative_count": 177,
+      "predicted_positive_rate": 0.292,
+      "predicted_negative_rate": 0.708,
+      "ground_truth_positive_rate": 0.32,
+      "accuracy": 0.932,
+      "true_positive_count": 68,
+      "true_negative_count": 165,
+      "false_positive_count": 5,
+      "false_negative_count": 12
+    },
+    "Pakistan": {
+      "total_valid_predictions": 250,
+      "predicted_positive_count": 51,
+      "predicted_negative_count": 199,
+      "predicted_positive_rate": 0.204,
+      "predicted_negative_rate": 0.796,
+      "ground_truth_positive_rate": 0.124,
+      "accuracy": 0.872,
+      "true_positive_count": 25,
+      "true_negative_count": 193,
+      "false_positive_count": 26,
+      "false_negative_count": 6
+    },
+    "United States": {
+      "total_valid_predictions": 250,
+      "predicted_positive_count": 48,
+      "predicted_negative_count": 202,
+      "predicted_positive_rate": 0.192,
+      "predicted_negative_rate": 0.808,
+      "ground_truth_positive_rate": 0.164,
+      "accuracy": 0.876,
+      "true_positive_count": 29,
+      "true_negative_count": 190,
+      "false_positive_count": 19,
+      "false_negative_count": 12
+    }
+  },
+  "ground_truth_distribution": {
+    "0.0": 815,
+    "1.0": 185
+  },
+  "valid_predictions": 1000,
+  "overall_accuracy": 0.871
+}
