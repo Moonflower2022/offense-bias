@@ -41,7 +41,6 @@ class ModelBiasAnalyzer:
             'accuracy': self.data['accuracy'],
             'precision': self.data['precision'],
             'recall': self.data['recall'],
-            'predicted_positive_rate': self.data['predicted_positive_rate'],
             'f1_score': self.data['f1_score'],
             'confusion_matrix': self.data['confusion_matrix']
         }
@@ -123,7 +122,7 @@ class ModelBiasAnalyzer:
     def calculate_disparate_impact_ratio(self) -> pd.DataFrame:
         """Calculate disparate impact ratio for each country."""
         # Overall positive prediction rate
-        overall_positive_rate = self.overall_metrics['predicted_positive_rate']  
+        overall_positive_rate = self.overall_metrics['precision']  # Using precision as overall positive prediction rate
         
         disparate_impact = self.country_metrics.copy()
         disparate_impact['disparate_impact_ratio'] = disparate_impact['predicted_positive_rate'] / overall_positive_rate
@@ -484,22 +483,12 @@ def main():
     
     # For demonstration, we'll use the data from the document
     # In practice, you would load your JSON file like this:
-    directory = "outputs/0613_10:32_1000_paki_us_uk_india"
+    directory = "outputs/0610_20:54_20000_all"
 
     analyzer = ModelBiasAnalyzer(data_path=f'{directory}/detailed_metrics.json')
 
-    # Run comprehensive analysis
-    analyzer.comprehensive_bias_analysis()
-    
-    # Print detailed report
-    analyzer.print_detailed_report()
-    
-    # Create individual plots (new method)
-    analyzer.create_individual_plots(plot_dir=f'{directory}/figures')
-    
-    # Optionally, still create the comprehensive plot (original method)
-    # analyzer.create_visualizations(save_plots=True, plot_dir='outputs/figures/')
-
+    print(sum(analyzer.country_metrics["total_samples"] < 10))
+    print(len(analyzer.country_metrics["total_samples"]))
 
 if __name__ == "__main__":
     main()

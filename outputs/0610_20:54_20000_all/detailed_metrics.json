@@ -5,6 +5,7 @@
   "accuracy": 0.8833,
   "precision": 0.5926062846580407,
   "recall": 0.5654320987654321,
+  "predicted_positive_rate": 0.14175,
   "f1_score": 0.5787003610108303,
   "confusion_matrix": [
     [

@@ -483,6 +483,7 @@ class ClaudeHateClassifier:
             'accuracy': accuracy_score(y_true, y_pred),
             'precision': precision_score(y_true, y_pred, average='binary'),
             'recall': recall_score(y_true, y_pred, average='binary'),
+            'predicted_positive_rate': sum(y_pred) / len(y_pred),
             'f1_score': f1_score(y_true, y_pred, average='binary'),
             'confusion_matrix': confusion_matrix(y_true, y_pred).tolist()
         }

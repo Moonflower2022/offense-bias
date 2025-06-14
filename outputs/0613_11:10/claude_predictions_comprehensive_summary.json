@@ -1,0 +1,77 @@
+{
+  "total_samples": 6300,
+  "processing_timestamp": "2025-06-13 13:19:23.572768",
+  "countries_analyzed": 4,
+  "country_distribution": {
+    "Canada": 1575,
+    "United States": 1575,
+    "Australia": 1575,
+    "United Kingdom": 1575
+  },
+  "prediction_distribution": {
+    "0": 4939,
+    "1": 1361
+  },
+  "error_count": 0,
+  "cache_hit_rate": 1.0,
+  "country_prediction_rates": {
+    "Canada": {
+      "total_valid_predictions": 1575,
+      "predicted_positive_count": 320,
+      "predicted_negative_count": 1255,
+      "predicted_positive_rate": 0.20317460317460317,
+      "predicted_negative_rate": 0.7968253968253968,
+      "ground_truth_positive_rate": 0.1657142857142857,
+      "accuracy": 0.9041269841269841,
+      "true_positive_count": 215,
+      "true_negative_count": 1209,
+      "false_positive_count": 105,
+      "false_negative_count": 46
+    },
+    "United States": {
+      "total_valid_predictions": 1575,
+      "predicted_positive_count": 238,
+      "predicted_negative_count": 1337,
+      "predicted_positive_rate": 0.1511111111111111,
+      "predicted_negative_rate": 0.8488888888888889,
+      "ground_truth_positive_rate": 0.1219047619047619,
+      "accuracy": 0.900952380952381,
+      "true_positive_count": 137,
+      "true_negative_count": 1282,
+      "false_positive_count": 101,
+      "false_negative_count": 55
+    },
+    "Australia": {
+      "total_valid_predictions": 1575,
+      "predicted_positive_count": 343,
+      "predicted_negative_count": 1232,
+      "predicted_positive_rate": 0.21777777777777776,
+      "predicted_negative_rate": 0.7822222222222223,
+      "ground_truth_positive_rate": 0.23936507936507936,
+      "accuracy": 0.820952380952381,
+      "true_positive_count": 219,
+      "true_negative_count": 1074,
+      "false_positive_count": 124,
+      "false_negative_count": 158
+    },
+    "United Kingdom": {
+      "total_valid_predictions": 1575,
+      "predicted_positive_count": 460,
+      "predicted_negative_count": 1115,
+      "predicted_positive_rate": 0.2920634920634921,
+      "predicted_negative_rate": 0.707936507936508,
+      "ground_truth_positive_rate": 0.2806349206349206,
+      "accuracy": 0.9098412698412699,
+      "true_positive_count": 380,
+      "true_negative_count": 1053,
+      "false_positive_count": 80,
+      "false_negative_count": 62
+    }
+  },
+  "ground_truth_distribution": {
+    "0.0": 5028,
+    "1.0": 1272
+  },
+  "valid_predictions": 6300,
+  "overall_accuracy": 0.883968253968254
+}

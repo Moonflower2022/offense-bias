@@ -50,6 +50,7 @@ class ModelBiasAnalyzerPaper:
             "accuracy": self.data["accuracy"],
             "precision": self.data["precision"],
             "recall": self.data["recall"],
+            "predicted_positive_rate": self.data["predicted_positive_rate"],
             "f1_score": self.data["f1_score"],
             "confusion_matrix": self.data["confusion_matrix"],
         }
@@ -130,7 +131,7 @@ class ModelBiasAnalyzerPaper:
         ]].sort_values("abs_accuracy_difference", ascending=False)
 
     def calculate_disparate_impact_ratio(self):
-        overall_ppv = self.overall_metrics["precision"]
+        overall_ppv = self.overall_metrics["predicted_positive_rate"]
         di = self.country_metrics.copy()
         di["disparate_impact_ratio"] = di["predicted_positive_rate"] / overall_ppv
         di["disparate_impact_flag"] = di["disparate_impact_ratio"].apply(
